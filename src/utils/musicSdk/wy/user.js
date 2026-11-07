@@ -1,7 +1,9 @@
 import { httpFetch } from '../../request'
 import { weapi } from './utils/crypto'
-import { getWyUidCache, saveWyUidCache } from '@/utils/data'
-import { toast, toMD5 } from '@/utils/tools'
+import { getWyUidCache, saveWyUidCache, getWyCookieRefreshTime, saveWyCookieRefreshTime } from '@/utils/data'
+import { updateSetting } from '@/core/common'
+import CookieManager from '@react-native-cookies/cookies'
+
 import settingState from "@/store/setting/state";
 import { setWyVipType } from "@/store/user/action";
 
@@ -591,5 +593,84 @@ export default {
         throw error;
       }
     }
+  },
+
+  async refreshCookie(cookie, force = false) {
+    if (!cookie) return null;
+    const now = Date.now();
+    if (!force) {
+      const last = await getWyCookieRefreshTime();
+      if (now - last < 24 * 60 * 60 * 1000) return cookie;
+    }
+
+    const csrfToken = (cookie.match(/_csrf=([^(;|$)]+)/) || [])[1];
+    const endpoints = [
+      'https://music.163.com/weapi/login/token/refresh',
+      'https://music.163.com/api/login/token/refresh',
+    ];
+
+    let refreshed = false;
+    for (const endpoint of endpoints) {
+      try {
+        const request = httpFetch(endpoint, {
+          method: 'post',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.54',
+            origin: 'https://music.163.com',
+            Referer: 'https://music.163.com',
+            cookie,
+          },
+          form: weapi({
+            csrf_token: csrfToken || '',
+          }),
+        });
+        const { body, statusCode, headers } = await request.promise;
+        if (statusCode !== 200 || (body && body.code && body.code !== 200)) {
+          continue;
+        }
+
+        let newCookie = '';
+        try {
+          const cookies = await CookieManager.get('https://music.163.com', true);
+          newCookie = Object.values(cookies)
+.map((c) => `${c.name}=${c.value}`)
+            .join('; ');
+        } catch (e) {
+          // ignore
+        }
+
+        if (!newCookie || !newCookie.includes('MUSIC_U')) {
+          const setCookie = headers?.['set-cookie'] || headers?.['Set-Cookie'] || headers?.setCookie;
+          if (setCookie) {
+            const arr = Array.isArray(setCookie) ? setCookie : [setCookie];
+            const merged = {};
+            for (const part of cookie.split(';')) {
+              const [k, ...v] = part.trim().split('=');
+              if (k) merged[k.trim()] = v.join('=').trim();
+            }
+            for (const sc of arr) {
+              for (const seg of String(sc).split(',')) {
+                const m = seg.trim().match(/^([^=,;\s]+)=([^;]+)/);
+                if (m) merged[m[1]] = m[2];
+              }
+            }
+            newCookie = Object.entries(merged)
+              .map(([k, v]) => `${k}=${v}`)
+              .join('; ');
+          }
+        }
+
+        if (newCookie && newCookie.includes('MUSIC_U')) {
+          updateSetting({ 'common.wy_cookie': newCookie });
+          await saveWyCookieRefreshTime(now);
+          return newCookie;
+        }
+      } catch (err) {
+        console.log('wy refreshCookie endpoint failed:', endpoint, err?.message);
+      }
+    }
+
+    await saveWyCookieRefreshTime(now);
+    return cookie;
   },
 }

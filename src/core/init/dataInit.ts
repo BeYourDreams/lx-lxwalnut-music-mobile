@@ -52,27 +52,29 @@ export default async (appSetting: LX.AppSetting) => {
   const wy_cookie = appSetting['common.wy_cookie']
   if (wy_cookie) {
     bootLog('Wy like list init...')
-    wyUserApi.getUid(wy_cookie)
+    wyUserApi.refreshCookie(wy_cookie, true).then((refreshedCookie: string) => {
+      const cookieToUse = refreshedCookie || wy_cookie
+      wyUserApi.getUid(cookieToUse)
       .then((uid: string) =>
       {
         setWyUid(uid)
-        wyUserApi.getLikedSongList(uid, wy_cookie).then((ids: (string | number)[]) => {
+        wyUserApi.getLikedSongList(uid, cookieToUse).then((ids: (string | number)[]) => {
           setWyLikedSongs(ids)
           bootLog('Wy like list inited.')
         })
-        wyUserApi.getAllSublist(wy_cookie).then((artists: FollowedArtistInfo[]) => {
+        wyUserApi.getAllSublist(cookieToUse).then((artists: FollowedArtistInfo[]) => {
           setWyFollowedArtists(artists)
           bootLog('Wy followed artists inited.')
         }).catch((err: any) => {
           bootLog(`Wy followed artists init failed: ${err.message}`)
         })
-        wyUserApi.getAllSubAlbumList(wy_cookie).then((albums: SubscribedAlbumInfo[]) => {
+        wyUserApi.getAllSubAlbumList(cookieToUse).then((albums: SubscribedAlbumInfo[]) => {
           setWySubscribedAlbums(albums)
           bootLog('Wy liked albums inited.')
         }).catch((err: any) => {
           bootLog(`Wy liked albums init failed: ${err.message}`)
         })
-        wyUserApi.getUserPlaylists(uid, wy_cookie).then((playlists: SubscribedPlaylistInfo[]) => {
+        wyUserApi.getUserPlaylists(uid, cookieToUse).then((playlists: SubscribedPlaylistInfo[]) => {
           setWySubscribedPlaylists(playlists)
           bootLog('Wy subscribed playlists inited.')
         }).catch((err: any) => {
@@ -82,6 +84,9 @@ export default async (appSetting: LX.AppSetting) => {
       .catch((err: any) => {
         bootLog(`Wy like list init failed: ${err.message}`)
       })
+    }).catch((err: any) => {
+      bootLog(`Wy cookie refresh failed: ${err?.message}`)
+    })
   }
 
   setNavActiveId((await getViewPrevState()).id)

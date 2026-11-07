@@ -4,9 +4,13 @@ import InputItem, { type InputItemProps } from '../../components/InputItem';
 import { useI18n } from '@/lang';
 import { useSettingValue } from '@/store/setting/hook';
 import { updateSetting } from '@/core/common';
+import settingState from '@/store/setting/state';
+
+
 import { createStyle, toast } from '@/utils/tools';
 import Button from '../../components/Button';
 import CookieManager from '@react-native-cookies/cookies';
+import wyApi from '@/utils/musicSdk/wy/user';
 
 
 
@@ -94,6 +98,20 @@ export default memo(() => {
       />
       <View style={styles.btnContainer}>
         <Button onPress={handleShowLoginModal}>网页登录</Button>
+        <Button onPress={async () => {
+          const c = settingState?.setting?.['common.wy_cookie'] || cookie;
+          try {
+            const nc = await wyApi.refreshCookie(c, true);
+            if (nc && nc !== c) {
+              setCookie(nc);
+              toast('Cookie 已刷新', 'long');
+            } else {
+              toast('Cookie 无需更新或刷新失败', 'long');
+            }
+          } catch (e) {
+            toast('刷新失败', 'long');
+          }
+        }}>刷新登录状态</Button>
       </View>
     </View>
   );

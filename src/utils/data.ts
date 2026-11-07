@@ -40,6 +40,7 @@ const openStoragePathPrefix = storageDataPrefix.openStoragePath
 const selectedManagedFolderPrefix = storageDataPrefix.selectedManagedFolder
 const lastSelectQualityKey = storageDataPrefix.lastSelectQuality
 const wyUidCachePrefix = storageDataPrefix.wyUidCache
+const wyCookieRefreshTimeKey = storageDataPrefix.wyCookieRefreshTime
 
 // const defaultListKey = listPrefix + 'default'
 // const loveListKey = listPrefix + 'love'
@@ -675,6 +676,11 @@ export const getWyUidCache = async (hashedCookie: string): Promise<{ uid: string
 }
 export const saveWyUidCache = async (hashedCookie: string, uid: string, vipType: number) => {
   await saveData(wyUidCachePrefix + hashedCookie, { uid, vipType })
+}
+
+export const getWyCookieRefreshTime = async (): Promise<number> => (await getData<number>(wyCookieRefreshTimeKey)) ?? 0
+export const saveWyCookieRefreshTime = async (time: number) => {
+  await saveData(wyCookieRefreshTimeKey, time)
 }
 
 const similarSongsCacheKey = storageDataPrefix.similarSongsCache;
