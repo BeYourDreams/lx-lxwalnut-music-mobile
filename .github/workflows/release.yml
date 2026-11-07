@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           if ! swapon --show | grep -q .; then
-            sudo fallocate -l 8G /swapfile && sudo chmod 600 /swapfile
+            sudo fallocate -l 10G /swapfile && sudo chmod 600 /swapfile
             sudo mkswap /swapfile && sudo swapon /swapfile
           fi
           free -h
@@ -103,13 +103,13 @@ jobs:
         env:
           DISABLE_SVG: 1
           PACKAGE_VERSION: ${{ steps.resolve.outputs.next_version }}
-          NODE_OPTIONS: --max-old-space-size=3072
+          NODE_OPTIONS: --max-old-space-size=2048
         shell: bash
         run: |
           cd android
           echo ${{ secrets.MYAPP_KEYSTORE_BASE64 }} | base64 --decode > app/${{ secrets.MYAPP_UPLOAD_STORE_FILE }}
           chmod +x ./gradlew
-          ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE='${{ secrets.MYAPP_UPLOAD_STORE_FILE }}' -PMYAPP_UPLOAD_KEY_ALIAS='${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}' -PMYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}' -PMYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}'
+          ./gradlew assembleRelease --no-daemon -PMYAPP_UPLOAD_STORE_FILE='${{ secrets.MYAPP_UPLOAD_STORE_FILE }}' -PMYAPP_UPLOAD_KEY_ALIAS='${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}' -PMYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}' -PMYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}'
           rm -f app/${{ secrets.MYAPP_UPLOAD_STORE_FILE }}
 
       - name: Create git tag
