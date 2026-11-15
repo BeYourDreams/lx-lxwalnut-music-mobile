@@ -225,6 +225,11 @@ declare global {
       'player.isShowBluetoothLyric': boolean
 
       /**
+       * 歌词偏移量（毫秒，正值歌词延后显示，用于抵消蓝牙/投屏音频延迟）
+       */
+      'player.lyricOffset': number
+
+      /**
        * 播放详情页-歌词对齐方式
        */
       'playDetail.style.align': 'center' | 'left' | 'right'

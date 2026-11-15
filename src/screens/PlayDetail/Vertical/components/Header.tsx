@@ -9,7 +9,6 @@ import { scaleSizeH } from '@/utils/pixelRatio'
 import { HEADER_HEIGHT as _HEADER_HEIGHT, NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import commonState from '@/store/common/state'
 import SettingPopup, { type SettingPopupType } from '../../components/SettingPopup'
-import LandscapeImmersionSettingPopup, { type LandscapeImmersionSettingPopupType } from '../../components/LandscapeImmersionSettingPopup'
 import { useStatusbarHeight } from '@/store/common/hook'
 import Btn from './Btn'
 import TimeoutExitBtn from './TimeoutExitBtn'
@@ -94,17 +93,12 @@ const Title = () => {
 
 export default memo(() => {
   const popupRef = useRef<SettingPopupType>(null)
-  const landscapeImmersionSettingPopupRef = useRef<LandscapeImmersionSettingPopupType>(null)
   const statusBarHeight = useStatusbarHeight()
-  const theme = useTheme()
   const back = () => {
     void pop(commonState.componentIds[commonState.componentIds.length - 1]?.id!)
   }
   const showSetting = () => {
     popupRef.current?.show()
-  }
-  const showLandscapeImmersionSetting = () => {
-    landscapeImmersionSettingPopupRef.current?.show()
   }
   return (
     <View
@@ -115,12 +109,10 @@ export default memo(() => {
       <View style={styles.container}>
         <Btn icon="chevron-left" onPress={back} />
         <Title />
-        <Btn icon="svg:landscape-immersion" color={theme['c-primary']} onPress={showLandscapeImmersionSetting} />
-        <TimeoutExitBtn />
+
         <Btn icon="slider" onPress={showSetting} />
       </View>
       <SettingPopup ref={popupRef} direction="vertical" />
-      <LandscapeImmersionSettingPopup ref={landscapeImmersionSettingPopupRef} />
     </View>
   )
 })

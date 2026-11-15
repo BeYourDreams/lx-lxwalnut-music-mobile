@@ -403,6 +403,8 @@
   "setting_play_show_translation": "顯示歌詞翻譯（如果可用）",
   "setting_player": "播放設定",
   "setting_player_save_play_time": "記住播放進度",
+  "setting_player_lyric_offset": "歌詞偏移（毫秒，正值歌詞延後）",
+  "setting_player_lyric_offset_tip": "已儲存歌詞偏移",
   "setting_search": "搜尋設定",
   "setting_search_show_history_search": "顯示歷史搜尋記錄",
   "setting_search_show_hot_search": "顯示熱門搜尋",

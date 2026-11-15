@@ -17,7 +17,7 @@ import {
 } from '@/core/desktopLyric'
 import { getPosition } from '@/plugins/player'
 import playerState from '@/store/player/state'
-// import settingState from '@/store/setting/state'
+import settingState from '@/store/setting/state'
 
 /**
  * init lyric
@@ -41,8 +41,11 @@ const handleSetLyric = async (lyric: string, translation = '', romalrc = '') => 
  * @param time play time
  */
 export const handlePlay = (time: number) => {
-  lrcPlay(time)
-  void playDesktopLyric(time)
+  // 蓝牙/投屏下的音画延迟补偿
+  const offset = settingState.setting['player.lyricOffset'] || 0
+  const lyricTime = time + offset
+  lrcPlay(lyricTime)
+  void playDesktopLyric(lyricTime)
 }
 
 /**

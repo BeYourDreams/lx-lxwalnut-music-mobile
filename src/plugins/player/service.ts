@@ -1,14 +1,11 @@
 import TrackPlayer, { State as TPState, Event as TPEvent } from 'react-native-track-player'
 // import { store } from '@/store'
 // import { action as playerAction, STATUS } from '@/store/modules/player'
-import { isTempId, isEmpty } from './utils'
+import { isTempId, isEmpty, getPosition, getDuration, setCurrentTime, JUMP_INTERVAL } from './utils'
 // import { play as lrcPlay, pause as lrcPause } from '@/core/lyric'
 import { exitApp } from '@/core/common'
 import { getCurrentTrackId } from './playList'
 import { pause, play, playNext, playPrev } from '@/core/player/player'
-import { showDesktopLyric, hideDesktopLyric } from '@/core/desktopLyric'
-import { updateSetting } from '@/core/common'
-import settingState from '@/store/setting/state'
 import { onWidgetPlayPause, onWidgetPrev, onWidgetNext } from '@/utils/nativeModules/musicWidget'
 
 let isInitialized = false
@@ -19,6 +16,21 @@ let isInitialized = false
 // let errorTime = 0
 // let prevDuration = 0
 // let isPlaying = false
+
+// 快进/快退（方向盘、车机、蓝牙按键）
+const seekBy = async (offset: number) => {
+  try {
+    const [position, duration] = await Promise.all([getPosition(), getDuration()])
+    let target = position + offset
+    if (target < 0) target = 0
+    else if (duration > 0 && target > duration) target = duration
+    if (Math.abs(target - position) < 0.5) return
+    await setCurrentTime(target)
+    global.app_event.setProgress(target, duration)
+  } catch (err) {
+    console.log('seek error', err)
+  }
+}
 
 // 销毁播放器并退出
 const handleExitApp = async (reason: string) => {
@@ -51,25 +63,19 @@ const registerPlaybackService = async () => {
     void playPrev()
   })
 
-  // JumpBackward (Rewind slot) -> LRC toggle
-  TrackPlayer.addEventListener(TPEvent.RemoteJumpBackward, () => {
-    // console.log('remote-jump-backward -> toggle lyric')
-    const isEnable = !settingState.setting['desktopLyric.enable']
-    if (isEnable) {
-      void showDesktopLyric().then(() => {
-        updateSetting({ 'desktopLyric.enable': true })
-      }).catch(() => { })
-    } else {
-      void hideDesktopLyric().then(() => {
-        updateSetting({ 'desktopLyric.enable': false })
-      })
-    }
+  // 快退（通知栏 Rewind / 方向盘 ⏪）
+  TrackPlayer.addEventListener(TPEvent.RemoteJumpBackward, (data: any) => {
+    void seekBy(-(data?.interval ?? JUMP_INTERVAL))
   })
 
-  // Stop is triggered by notification swipe-to-dismiss
+  // 快进（方向盘 ⏩ / 车机快进键）
+  TrackPlayer.addEventListener(TPEvent.RemoteJumpForward, (data: any) => {
+    void seekBy(data?.interval ?? JUMP_INTERVAL)
+  })
+
+  // 划掉通知 / 车机发送 STOP 时只暂停，不再直接退出应用
   TrackPlayer.addEventListener(TPEvent.RemoteStop, () => {
-    // console.log('remote-stop -> exit app')
-    void handleExitApp('Notification Dismissed')
+    void pause()
   })
 
   // Widget button handlers

@@ -8,8 +8,7 @@ import {
   temporaryDirectoryPath,
 } from '@/utils/fs'
 import { toast } from '@/utils/tools'
-import settingState from '@/store/setting/state'
-// import { PlayerMusicInfo } from '@/store/modules/player/playInfo'
+
 
 export { useBufferProgress } from './hook'
 
@@ -255,18 +254,21 @@ export const onStateChange = async (listener: (state: PlayStatus) => void) => {
  */
 // export const playState = callback => TrackPlayer.addEventListener('playback-state', callback)
 
-export const updateOptions = async (
-  isLyricEnabled = settingState.setting['desktopLyric.enable'],
-) => {
-  // console.log('updateOptions lyric:', isLyricEnabled)
+// 快进/快退步长（秒），与 service.ts 中的 seek 处理保持一致
+export const JUMP_INTERVAL = 15
+
+export const updateOptions = async () => {
   // Button slot mapping:
-  // Position 1: Rewind         → LRC lyrics toggle (custom icon)
-  // Position 2: SkipToPrevious → Previous track (standard)
+  // Position 1: Rewind         → seek -15s
+  // Position 2: SkipToPrevious → Previous track
   // Position 3: Play/Pause     → Play/Pause
-  // Position 4: SkipToNext     → Next track (standard)
-  // Stop is not shown in notification, but handles swipe-to-dismiss → exit app
+  // Position 4: SkipToNext     → Next track
+  // Stop is not shown in notification, handles swipe-to-dismiss → pause
   return TrackPlayer.updateOptions({
     stopWithApp: true,
+
+    forwardJumpInterval: JUMP_INTERVAL,
+    backwardJumpInterval: JUMP_INTERVAL,
 
     capabilities: [
       Capability.Play,
@@ -276,6 +278,7 @@ export const updateOptions = async (
       Capability.SkipToPrevious,
       Capability.SkipToNext,
       Capability.JumpBackward,
+      Capability.JumpForward,
     ],
 
     notificationCapabilities: [
@@ -292,10 +295,6 @@ export const updateOptions = async (
       Capability.Pause,
       Capability.SkipToNext,
     ],
-
-    // LRC toggle icon on Rewind slot
-    // @ts-expect-error - using native drawable resource name
-    rewindIcon: { uri: isLyricEnabled ? 'ic_lyric_on' : 'ic_lyric_off' },
   })
 }
 
