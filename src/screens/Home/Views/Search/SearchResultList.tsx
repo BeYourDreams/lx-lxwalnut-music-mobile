@@ -26,7 +26,7 @@ const SearchResultList = forwardRef<{ loadList(text: string): void }, SearchResu
     if (loading || (!isRefresh && !searchInfoRef.current.hasMore)) return
     setLoading(true)
 
-    let searchPromise: Promise<{ list: (FollowedArtistInfo | SubscribedAlbumInfo)[]; total: number }>
+    let searchPromise: Promise<{ list: (FollowedArtistInfo | SubscribedAlbumInfo)[]; total: number; allPage: number }>
     if (searchType === 'singer') {
       searchPromise = musicSearch.searchSinger(text, page)
     } else if (searchType === 'album') {
@@ -39,7 +39,7 @@ const SearchResultList = forwardRef<{ loadList(text: string): void }, SearchResu
     searchPromise.then(result => {
       setList(isRefresh ? result.list : [...list, ...result.list])
       searchInfoRef.current.page = page + 1
-      searchInfoRef.current.hasMore = result.list.length > 0 && result.total > (page * 30)
+      searchInfoRef.current.hasMore = result.list.length > 0 && page < result.allPage
     }).catch(() => {}).finally(() => {
       setLoading(false)
     })
