@@ -302,6 +302,13 @@ export class AppEvent extends Event {
     this.emit('triggerSearch', text)
   }
 
+  /**
+   * 搜索“我的列表”内歌曲
+   */
+  triggerListSearch(text: string) {
+    this.emit('triggerListSearch', text)
+  }
+
   download_list_changed() {
     this.emit('download_list_changed')
   }

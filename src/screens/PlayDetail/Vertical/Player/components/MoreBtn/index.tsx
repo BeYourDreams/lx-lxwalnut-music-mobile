@@ -1,10 +1,8 @@
 import {createStyle, toast} from '@/utils/tools'
 import { View, TouchableOpacity } from 'react-native'
 import PlayModeBtn from './PlayModeBtn'
-import MusicAddBtn from './MusicAddBtn'
-import DesktopLyricBtn from './DesktopLyricBtn'
-import CommentBtn from './CommentBtn'
-import LoveBtn from './LoveBtn'
+import FavoriteBtn from '@/screens/PlayDetail/components/FavoriteBtn'
+import DesktopLyricEnable, { type DesktopLyricEnableType } from '@/components/DesktopLyricEnable'
 import {memo, useRef, useCallback} from 'react'
 import Btn from './Btn'
 import { type Position } from '@/screens/Home/Views/Mylist/MusicList/ListMenu'
@@ -17,8 +15,9 @@ import MusicDownloadModal, { type MusicDownloadModalType } from '@/screens/Home/
 import settingState from '@/store/setting/state'
 import {getMvUrl} from "@/utils/musicSdk/wy/mv.js";
 import SimilarSongsModal, { type SimilarSongsModalType } from '@/components/SimilarSongsModal'
-import { isOneDriveMusicInfo } from '@/core/oneDrive/utils'
-import { usePlayMusicInfo } from '@/store/player/hook'
+import { navigations } from '@/navigation'
+import commonState from '@/store/common/state'
+import { useSettingValue } from '@/store/setting/hook'
 
 
 export default memo(({ componentId }: { componentId: string }) => {
@@ -27,8 +26,16 @@ export default memo(({ componentId }: { componentId: string }) => {
   const musicAddModalRef = useRef<MusicAddModalType>(null);
   const musicDownloadModalRef = useRef<MusicDownloadModalType>(null);
   const similarSongsModalRef = useRef<SimilarSongsModalType>(null);
-  const playMusicInfo = usePlayMusicInfo();
-  const isOneDrive = isOneDriveMusicInfo(playMusicInfo.musicInfo);
+  const desktopLyricEnableRef = useRef<DesktopLyricEnableType>(null);
+  const enabledLyric = useSettingValue('desktopLyric.enable');
+
+  const handleDesktopLyric = useCallback(() => {
+    desktopLyricEnableRef.current?.setEnabled(!enabledLyric);
+  }, [enabledLyric]);
+
+  const handleComment = useCallback(() => {
+    navigations.pushCommentScreen(commonState.componentIds[commonState.componentIds.length - 1]?.id!);
+  }, []);
 
   const handleShowMenu = useCallback(() => {
     const musicInfo = playerState.playMusicInfo.musicInfo;
@@ -104,11 +111,8 @@ export default memo(({ componentId }: { componentId: string }) => {
   return (
     <>
       <View style={styles.container}>
-        <DesktopLyricBtn />
-        <LoveBtn />
-        <MusicAddBtn />
+        <FavoriteBtn />
         <PlayModeBtn />
-        {isOneDrive ? null : <CommentBtn />}
         <Btn icon="dots-vertical" onPress={handleShowMenu} ref={moreBtnRef} />
       </View>
 
@@ -124,7 +128,10 @@ export default memo(({ componentId }: { componentId: string }) => {
         onMusicSourceDetail={onMusicSourceDetail}
         onDislikeMusic={onDislikeMusic}
         onPlayMv={onPlayMv}
+        onDesktopLyric={handleDesktopLyric}
+        onComment={handleComment}
       />
+      <DesktopLyricEnable ref={desktopLyricEnableRef} />
       <MusicAddModal ref={musicAddModalRef} />
       {settingState.setting['download.enable'] && <MusicDownloadModal ref={musicDownloadModalRef} onDownloadInfo={() => {}} />}
       <SimilarSongsModal ref={similarSongsModalRef} />

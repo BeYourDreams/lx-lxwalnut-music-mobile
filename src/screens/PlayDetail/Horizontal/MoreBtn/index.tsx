@@ -3,13 +3,13 @@ import { View } from 'react-native'
 import PlayModeBtn from './PlayModeBtn'
 import MusicAddBtn from './MusicAddBtn'
 import TimeoutExitBtn from './TimeoutExitBtn'
-import LoveBtn from './LoveBtn'
+import FavoriteBtn from '@/screens/PlayDetail/components/FavoriteBtn'
 
 export default () => {
   return (
     <View style={styles.container}>
+      <FavoriteBtn />
       <TimeoutExitBtn />
-      <LoveBtn />
       <MusicAddBtn />
       <PlayModeBtn />
     </View>

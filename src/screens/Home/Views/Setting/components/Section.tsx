@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react'
 import { View } from 'react-native'
 
 import { createStyle } from '@/utils/tools'
@@ -9,14 +10,20 @@ interface Props {
   children: React.ReactNode | React.ReactNode[]
 }
 
+// 手风琴模式下由外层渲染标题
+export const SectionAccordionContext = createContext(false)
+
 export default ({ title, children }: Props) => {
   const theme = useTheme()
+  const inAccordion = useContext(SectionAccordionContext)
 
   return (
     <View style={styles.container}>
-      <Text style={{ ...styles.title, borderLeftColor: theme['c-primary'] }} size={16}>
-        {title}
-      </Text>
+      {inAccordion ? null : (
+        <Text style={{ ...styles.title, borderLeftColor: theme['c-primary'] }} size={16}>
+          {title}
+        </Text>
+      )}
       <View>{children}</View>
     </View>
   )

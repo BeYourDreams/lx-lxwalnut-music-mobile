@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback } from 'react'
 import { View, TouchableOpacity, ScrollView } from 'react-native'
 
 import { useTheme } from '@/store/theme/hook'
@@ -51,15 +51,19 @@ const ListItem = memo(
   }
 )
 
-export default ({ onChangeId }: { onChangeId: (id: SettingScreenIds) => void }) => {
-  const [activeId, setActiveId] = useState(global.lx.settingActiveId)
+export default ({
+  onChangeId,
+  activeId,
+}: {
+  onChangeId: (id: SettingScreenIds) => void
+  activeId: SettingScreenIds
+}) => {
   const theme = useTheme()
 
   const handleChangeId = useCallback((id: SettingScreenIds) => {
     onChangeId(id)
-    setActiveId(id)
     global.lx.settingActiveId = id
-  }, [])
+  }, [onChangeId])
 
   return (
     <ScrollView

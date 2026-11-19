@@ -46,7 +46,6 @@ const syncCookieToNative = async (cookie: string) => {
 export default memo(() => {
   const t = useI18n();
   const cookie = useSettingValue('common.wy_cookie');
-  const serpApiKey = useSettingValue('common.wy_serpapi_key');
 
   const setCookie = (val: string) => {
     // 先同步到原生层
@@ -61,12 +60,7 @@ export default memo(() => {
     setCookie(text);
   };
 
-  const handleSerpApiKeyChanged: InputItemProps['onChanged'] = (text, callback) => {
-    callback(text);
-    updateSetting({ 'common.wy_serpapi_key': text.trim() });
-  };
 
-  const handleShowLoginModal = () => {
     // 触发全局事件
     global.app_event.emit('showWebLogin');
   };
@@ -90,13 +84,7 @@ export default memo(() => {
         onChanged={handleChanged}
         placeholder={t('setting_basic_wy_cookie_placeholder')}
       />
-      <InputItem
-        value={serpApiKey}
-        label="SerpApi API Key"
-        onChanged={handleSerpApiKeyChanged}
-        placeholder="用于网易云搜索补充 Google 搜索结果"
-      />
-      <View style={styles.btnContainer}>
+
         <Button onPress={handleShowLoginModal}>网页登录</Button>
         <Button onPress={async () => {
           const c = settingState?.setting?.['common.wy_cookie'] || cookie;

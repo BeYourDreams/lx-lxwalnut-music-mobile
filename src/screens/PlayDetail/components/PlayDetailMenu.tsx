@@ -22,6 +22,8 @@ export interface PlayDetailMenuProps {
   onSimilarSongs: (selectInfo: SelectInfo) => void
   onLike: (selectInfo: SelectInfo) => void
   onPlayMv: (selectInfo: SelectInfo) => void
+  onDesktopLyric: () => void
+  onComment: () => void
 }
 
 export interface PlayDetailMenuType {
@@ -62,6 +64,9 @@ export default forwardRef<PlayDetailMenuType, PlayDetailMenuProps>((props, ref) 
     const musicInfo = selectInfo.musicInfo;
     const isOneDrive = isOneDriveMusicInfo(musicInfo);
     const menuItems: Menus[number][] = [];
+    menuItems.push({ action: 'add', label: t('add_to') });
+    menuItems.push({ action: 'desktopLyric', label: '桌面歌词' });
+    if (!isOneDrive) menuItems.push({ action: 'comment', label: '评论' });
     if (!isOneDrive) menuItems.push({ action: 'download', label: t('download') });
     if (menuSetting.share) menuItems.push({ action: 'copyName', label: t('copy_name') });
 
@@ -85,6 +90,12 @@ export default forwardRef<PlayDetailMenuType, PlayDetailMenuProps>((props, ref) 
 
   const handleMenuPress = ({ action }: (typeof menus)[number]) => {
     switch (action) {
+      case 'add':
+        return props.onAdd(selectInfo);
+      case 'desktopLyric':
+        return props.onDesktopLyric();
+      case 'comment':
+        return props.onComment();
       case 'like':
         return props.onLike(selectInfo);
       case 'download':

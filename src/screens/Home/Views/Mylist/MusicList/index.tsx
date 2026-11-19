@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import listState from '@/store/list/state'
 import settingState from '@/store/setting/state'
@@ -37,7 +37,7 @@ import {handleShowAlbumDetail, handleShowArtistDetail} from "@/components/Online
 import {useSettingValue} from "@/store/setting/hook.ts";
 import {updateSetting} from "@/core/common.ts";
 import {getMvUrl} from "@/utils/musicSdk/wy/mv.js";
-import commonState from '@/store/common/state';
+import commonState, { type InitState as CommonState } from '@/store/common/state';
 import SimilarSongsModal, { type SimilarSongsModalType } from '@/components/SimilarSongsModal'
 
 export default () => {
@@ -152,6 +152,23 @@ export default () => {
   )
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     layoutHeightRef.current = e.nativeEvent.layout.height
+  }, [])
+
+  useEffect(() => {
+    const handleListSearch = (keyword: string) => {
+      listMusicSearchRef.current?.search(keyword, layoutHeightRef.current)
+    }
+    const handleNavChange = (id: CommonState['navActiveId']) => {
+      if (id !== 'nav_love') listMusicSearchRef.current?.hide()
+    }
+
+    global.app_event.on('triggerListSearch', handleListSearch)
+    global.state_event.on('navActiveIdUpdated', handleNavChange)
+
+    return () => {
+      global.app_event.off('triggerListSearch', handleListSearch)
+      global.state_event.off('navActiveIdUpdated', handleNavChange)
+    }
   }, [])
 
   const handleAddMusic = useCallback((info: SelectInfo) => {
