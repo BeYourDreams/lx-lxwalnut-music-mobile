@@ -60,7 +60,7 @@ export default memo(() => {
     setCookie(text);
   };
 
-
+  const handleShowLoginModal = () => {
     // 触发全局事件
     global.app_event.emit('showWebLogin');
   };
@@ -100,7 +100,6 @@ export default memo(() => {
             toast('刷新失败', 'long');
           }
         }}>刷新登录状态</Button>
-      </View>
     </View>
   );
 });
