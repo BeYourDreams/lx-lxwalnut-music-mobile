@@ -18,6 +18,7 @@ assert.ok(settingMain.includes('SectionAccordionContext'), '设置页未启用�
 assert.ok(settingMain.includes('<NavList'), '设置页缺少快速直达导航')
 assert.ok(!basic.includes('TxCookie'), 'QQ 音乐 Cookie 未隐藏')
 assert.ok(basic.includes('WyCookie'), '网易云 Cookie 被误删')
+assert.ok(basic.includes("from './NavMenu'"), 'NavMenu 组件未导入')
 assert.ok(!wy.includes('SerpApi'), 'SerpApi 未隐藏')
 
 // 播放详情页：喜欢按钮隐藏，添加到/歌词/评论进更多，最左侧一键收藏

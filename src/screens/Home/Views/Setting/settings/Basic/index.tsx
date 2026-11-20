@@ -18,9 +18,9 @@ import IsAlwaysKeepStatusbarHeight from './IsAlwaysKeepStatusbarHeight'
 import DrawerLayoutPosition from './DrawerLayoutPosition'
 import { useI18n } from '@/lang/i18n'
 import WyCookie from './WyCookie'
+import NavMenu from './NavMenu'
 
-
-export default memo(() => {
+export default
   const t = useI18n()
 
   return (
