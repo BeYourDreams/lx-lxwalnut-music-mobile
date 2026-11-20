@@ -20,7 +20,7 @@ import { useI18n } from '@/lang/i18n'
 import WyCookie from './WyCookie'
 import NavMenu from './NavMenu'
 
-export default
+export default memo(() => {
   const t = useI18n()
 
   return (
